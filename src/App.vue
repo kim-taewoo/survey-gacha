@@ -2,8 +2,6 @@
   <v-app dark>
     <v-navigation-drawer
       persistent
-      :mini-variant="miniVariant"
-      :clipped="clipped"
       v-model="drawer"
       enable-resize-watcher
       fixed
@@ -28,7 +26,7 @@
       app
       color="black"
       :clipped-left="clipped"
-      class="elevation-0"
+      class="elevation-2"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
 
@@ -37,8 +35,10 @@
     <v-content>
       <router-view/>
     </v-content>
-    <v-footer :fixed="fixed" app>
-      <span>&copy; 2017</span>
+    <v-footer app>
+      <v-flex xs12 class="text-xs-right px-3 py-2">
+        <span>&copy; 2018 Kim Taewoo</span>
+      </v-flex>
     </v-footer>
   </v-app>
 </template>
@@ -54,8 +54,6 @@ export default {
         icon: 'bubble_chart',
         title: 'Inspire'
       }],
-      miniVariant: false,
-      right: true,
     }
   },
   name: 'App'

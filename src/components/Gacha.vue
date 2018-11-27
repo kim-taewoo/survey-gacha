@@ -2,11 +2,28 @@
   <v-container fill-height>
     <v-layout wrap justify-center align-center>
       <v-flex xs12>
-        <p style="user-select:none">아직 <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다.</p>
-        <figure id="bridgeContainer" class="grey darken-3 py-2 px-2">
+        <p class="pl-2" style="user-select:none"> <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다.</p>
+        <figure v-show="imgReady" id="bridgeContainer" class="grey darken-3 py-2 px-2" style="border-radius: 10px">
             <canvas id="bridge" width="750" height="550"></canvas>
         </figure>
+        <figure v-show="!imgReady" class="grey darken-3 py-3 px-2 pa-5" style="border-radius: 10px">
+          <v-flex xs12 class="d-flex justify-center">
+            <v-progress-circular
+              justify-center
+              :size="50"
+              color="amber"
+              indeterminate
+              class="d-flex justify-center"
+            ></v-progress-circular>
+          </v-flex>
+        </figure>
         <figcaption style="user-select:none" class="text-xs-center mt-2">↑ 긁어보세요!</figcaption>
+
+        <v-flex xs12 class="text-xs-center mt-3">
+          <v-btn @click="retryGacha()" color="pink" block>재도전!</v-btn>
+        </v-flex>
+
+
       </v-flex>
     </v-layout>
   </v-container>
@@ -22,47 +39,70 @@ import nextTime from '@/assets/nextTime.png'
 export default {
   data () {
     return {
-      changed: false,
       imgUrl: null,
-      gacha: false,
+      coverImg: null,
       docLength: 0,
-      nextTime: nextTime
+      nextTime: nextTime,
+      imgReady: false
     }
   },
   methods: {
-    changeState () {
-      this.changed = !this.changed
+    prepareGacha () {
+      let ref = db.collection('surveys').doc('4EVtv9nkqdLM2LjbByJs')
+      ref.get()
+      .then((doc) => {
+        this.docLength = doc.data().gifts.unused.length
+        if (this.docLength >= 1) {
+          const rand = Math.random() <= 0.5
+          if (rand) {
+            this.imgUrl = doc.data().gifts.unused[0]
+            let gifts = doc.data().gifts
+            gifts.used.push(gifts.unused[0])
+            // ref.update({
+            //   "gifts.unused" : gifts.unused.slice(1,),
+            //   "gifts.used" : gifts.used
+            // })
+          } else {
+            this.imgUrl = this.nextTime
+          }
+        } else {
+          this.imgUrl = this.nextTime
+        }
+      })
+      .then(() => {
+        this.drawImage()
+      })
+    },
+    retryGacha() {
+      this.imgReady = false
+      this.imgUrl = null
+      this.coverImg = null
+      this.prepareGacha()
     },
     drawImage() {
-      var bridge = document.getElementById("bridge"),
-      bridgeCanvas = bridge.getContext('2d'),
-      brushRadius = (bridge.width / 100) * 5,
-      img = new Image();
+      var bridge = document.getElementById("bridge")
+      var bridgeCanvas = bridge.getContext('2d')
+      var brushRadius = (bridge.width / 100) * 5
+      var img = new Image()
 
-      if (brushRadius < 50) { brushRadius = 50 }
-
-      
-      img.loc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/';
-      img.filename = 'calgary-bridge-2013.jpg';
-      if (window.devicePixelRatio >= 2) {
-        var nameParts = img.filename.split('.');
-        img.src = img.loc + nameParts[0]+"-2x"+"."+nameParts[1];
-      } else {
-        img.src = img.loc + img.filename;
-      }
-      // img.src = this.imgUrl
-      // this.$nextTick(function () {
-      //   this.setBackground()
-      // })
-      // if (img.getAttribute('src')) {
-      //   this.$nextTick(function () {
-      //     this.setBackground()
-      //   })
+      if (brushRadius < 40) { brushRadius = 40 }
+      // console.log('다시')
+      this.coverImg = `https://picsum.photos/${bridge.width}/${bridge.height}/?random`
+      img.src= this.coverImg
+      // img.loc = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/';
+      // img.filename = 'calgary-bridge-2013.jpg';
+      // if (window.devicePixelRatio >= 2) {
+      //   var nameParts = img.filename.split('.');
+      //   img.src = img.loc + nameParts[0]+"-2x"+"."+nameParts[1];
+      // } else {
+      //   img.src = img.loc + img.filename;
       // }
+  
       var vm = this
       img.onload = function(){  
         bridgeCanvas.drawImage(img, 0, 0, bridge.width, bridge.height);
         vm.setBackground()
+        vm.imgReady = true
       } 
 
       function detectLeftButton(event) {
@@ -109,44 +149,15 @@ export default {
       }, false);
     },
 
-
     setBackground() {
       var bridge = document.getElementById("bridge")
       bridge.style.backgroundImage = `url(${this.imgUrl}`
       // bridge.style.backgroundImage = -webkit-image-set(url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/calgary-bridge-1943.jpg') 1x, url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/calgary-bridge-1943-2x.jpg') 2x );
     }
   },
-  created () {
-    let ref = db.collection('surveys').doc('4EVtv9nkqdLM2LjbByJs')
-    ref.get()
-    .then((doc) => {
-      this.docLength = doc.data().gifts.unused.length
-      if (this.docLength >= 1) {
-        const rand = Math.random() <= 0.7
-        if (rand) {
-          this.imgUrl = doc.data().gifts.unused[0]
-          let gifts = doc.data().gifts
-          gifts.used.push(gifts.unused[0])
-          ref.update({
-            "gifts.unused" : gifts.unused.slice(1,),
-            "gifts.used" : gifts.used
-          })
-        } else {
-          this.imgUrl = this.nextTime
-        }
-      } else {
-        this.imgUrl = this.nextTime
-      }
-    })
-    .then(() => {
-      this.drawImage()
-    })
-    
 
-      // ref.update({
-      //   "gifts.unused" : gifts.unused.slice(1,),
-      //   "gifts.used" : gifts.used.slice().push(gifts.unused[0])
-      // })
+  mounted () {
+    this.prepareGacha()
 
   },
 }

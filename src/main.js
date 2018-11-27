@@ -3,31 +3,32 @@ import App from './App'
 import router from './router'
 import {
   Vuetify,
+  VGrid,
   VApp,
   VTextField,
   VNavigationDrawer,
   VFooter,
-  VList,
   VBtn,
   VIcon,
-  VGrid,
   VToolbar,
-  transitions
+  VList,
+  VProgressCircular
 } from 'vuetify'
+
 import '../node_modules/vuetify/src/stylus/app.styl'
 
 Vue.use(Vuetify, {
   components: {
     VApp,
+    VGrid,
     VNavigationDrawer,
     VTextField,
     VFooter,
-    VList,
     VBtn,
     VIcon,
-    VGrid,
     VToolbar,
-    transitions
+    VList,
+    VProgressCircular
   }
 })
 
