@@ -12,6 +12,7 @@
           value="true"
           v-for="(item, i) in items"
           :key="i"
+          :to="item.link"
         >
           <v-list-tile-action>
             <v-icon v-html="item.icon"></v-icon>
@@ -25,7 +26,6 @@
     <v-toolbar
       app
       color="black"
-      :clipped-left="clipped"
       class="elevation-2"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
@@ -35,9 +35,10 @@
     <v-content>
       <router-view/>
     </v-content>
-    <v-footer app>
+    <v-footer app height="60">
       <v-flex xs12 class="text-xs-right px-3 py-2">
-        <span>&copy; 2018 Kim Taewoo</span>
+        <span>&copy; 2018 Kim Taewoo SKKU</span>
+        <div>이용문의 & 피드백: acoustic0419@gmail.com</div>
       </v-flex>
     </v-footer>
   </v-app>
@@ -47,13 +48,10 @@
 export default {
   data () {
     return {
-      clipped: false,
       drawer: false,
-      fixed: false,
-      items: [{
-        icon: 'bubble_chart',
-        title: 'Inspire'
-      }],
+      items: [
+        {title: 'About',icon:'contact_support',link:'/'}
+      ]
     }
   },
   name: 'App'

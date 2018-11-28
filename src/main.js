@@ -12,7 +12,10 @@ import {
   VIcon,
   VToolbar,
   VList,
-  VProgressCircular
+  VProgressCircular,
+  VDialog,
+  VCard,
+  VDivider
 } from 'vuetify'
 
 import '../node_modules/vuetify/src/stylus/app.styl'
@@ -28,7 +31,10 @@ Vue.use(Vuetify, {
     VIcon,
     VToolbar,
     VList,
-    VProgressCircular
+    VProgressCircular,
+    VDialog,
+    VCard,
+    VDivider
   }
 })
 
