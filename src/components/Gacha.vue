@@ -41,14 +41,14 @@
 
               <v-card-text>
                 <div>
-                  아래에 본인만의 아이디를 씁니다. (이후 이 아이디로 접속해야 하니 기억해주세요!)
+                  아래에 본인만의 아이디를 씁니다.
                 </div>
                 <v-flex class="xs12 md4">
                   <v-text-field hide-details label="아이디" v-model="share_id"></v-text-field>
-                  <div v-if="feedback" class="text-xs-center red--text">{{feedback}}</div>
+                  <div v-if="feedback" class="text-xs-center red--text my-2">{{feedback}}</div>
                 </v-flex>
                 <v-flex>
-                  <v-btn block color="blue" @click="checkDup">중복확인</v-btn>
+                  <v-btn :loading="loading" block color="blue" @click="checkDup">중복확인</v-btn>
                 </v-flex>
                 <div>
                   중복확인까지 완료했다면 아래 생성된 주소를 복사해서 공유해주세요!
@@ -65,10 +65,10 @@
               <v-divider></v-divider>
 
               <v-card-actions>
-                <v-spacer></v-spacer>
                 <v-btn
                   color="primary"
-                  flat
+                  
+                  block
                   @click="dialog = false"
                 >
                   알겠어요!
@@ -103,7 +103,8 @@ export default {
       remainGacha: 0,
       dialog: false,
       share_id: null,
-      feedback: null
+      feedback: null,
+      loading: false
     }
   },
   computed: {
@@ -114,57 +115,74 @@ export default {
   methods: {
     checkDup() {
       if (this.share_id) {
+        this.loading = true
         let ref = db.collection('shareUsers').doc(this.share_id)
         ref.get()
         .then(doc => {
           if (doc.exists) {
             this.feedback = "중복된 아이디가 있네요ㅠ"
+            this.loading = false
           } else {
             ref.set({
               shared: 0
             }).then(()=>{
               this.feedback = "좋아요!"
+              this.loading = false
             })
           }
+        })
+        .catch(err=>{
+          console.log(err)
+          this.loading=false
         })
       } else {
         this.feedback = "아이디를 입력하세요!"
       }
     },
     prepareGacha () {
-      let ref = db.collection('surveys').doc(this.id)
-      ref.get()
-      .then((doc) => {
-        if (!doc.exists) {
-          this.$router.push({name:'ErrorPage'})
-        } else {
-          this.docLength = doc.data().gifts.unused.length
-          if (this.docLength >= 1) {
-            let rand = Math.random() <= 0.08
-            if (rand) {
-              this.imgUrl = doc.data().gifts.unused[0]
-              let gifts = doc.data().gifts
-              gifts.used.push(gifts.unused[0])
-              // ref.update({
-              //   "gifts.unused" : gifts.unused.slice(1,),
-              //   "gifts.used" : gifts.used
-              // })
+      if (this.remainGacha <= 0) {
+        this.imgUrl = this.nextTime
+        this.setBackground()
+        this.imgReady=true
+        alert('뽑기권을 다 사용하셨네요ㅠ')
+      } else {
+        let ref = db.collection('surveys').doc(this.id)
+        ref.get()
+        .then((doc) => {
+          if (!doc.exists) {
+            this.$router.push({name:'ErrorPage'})
+          } else {
+            this.docLength = doc.data().gifts.unused.length
+            if (this.docLength >= 1) {
+              let rand = Math.random() <= 0.08
+              if (rand) {
+                this.imgUrl = doc.data().gifts.unused[0]
+                let gifts = doc.data().gifts
+                gifts.used.push(gifts.unused[0])
+                // ref.update({
+                //   "gifts.unused" : gifts.unused.slice(1,),
+                //   "gifts.used" : gifts.used
+                // })
+              } else {
+                this.imgUrl = this.nextTime
+              }
             } else {
               this.imgUrl = this.nextTime
             }
-          } else {
-            this.imgUrl = this.nextTime
+  
           }
+        })
+        .then(() => {
+          this.drawImage()
+        })
 
-        }
-      })
-      .then(() => {
-        this.drawImage()
-      })
+      }
     },
     retryGacha() {
       if (this.remainGacha <= 0) {
         alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
+        this.setBackground()
+        this.imgReady = true
       } else {
         this.imgReady = false
         this.imgUrl = null

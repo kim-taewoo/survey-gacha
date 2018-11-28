@@ -52,34 +52,43 @@ export default {
   },
   methods: {
     prepareGacha () {
-      let ref = db.collection('surveys').doc('XDZuvUGl6e7HxyrFlK8v')
-      ref.get()
-      .then((doc) => {
-        this.docLength = doc.data().gifts.unused.length
-        if (this.docLength >= 1) {
-          let rand = Math.random() <= 0.08
-          if (rand) {
-            this.imgUrl = doc.data().gifts.unused[0]
-            let gifts = doc.data().gifts
-            gifts.used.push(gifts.unused[0])
-            // ref.update({
-            //   "gifts.unused" : gifts.unused.slice(1,),
-            //   "gifts.used" : gifts.used
-            // })
+      if (this.remainGachaShare <= 0) {
+        alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
+        this.setBackground()
+        this.imgReady = true
+      } else {
+
+        let ref = db.collection('surveys').doc('XDZuvUGl6e7HxyrFlK8v')
+        ref.get()
+        .then((doc) => {
+          this.docLength = doc.data().gifts.unused.length
+          if (this.docLength >= 1) {
+            let rand = Math.random() <= 0.08
+            if (rand) {
+              this.imgUrl = doc.data().gifts.unused[0]
+              let gifts = doc.data().gifts
+              gifts.used.push(gifts.unused[0])
+              // ref.update({
+              //   "gifts.unused" : gifts.unused.slice(1,),
+              //   "gifts.used" : gifts.used
+              // })
+            } else {
+              this.imgUrl = this.nextTime
+            }
           } else {
             this.imgUrl = this.nextTime
           }
-        } else {
-          this.imgUrl = this.nextTime
-        }
-      })
-      .then(() => {
-        this.drawImage()
-      })
+        })
+        .then(() => {
+          this.drawImage()
+        })
+      }
     },
     retryGacha() {
       if (this.remainGachaShare <= 0) {
         alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
+        this.setBackground()
+        this.imgReady = true
       } else {
         this.imgReady = false
         this.imgUrl = null
@@ -193,6 +202,9 @@ export default {
         this.remainGachaShare = doc.data().shared
       }
     })
+    .then(()=>{
+      this.prepareGacha()
+    })
     // const gacha = localStorage.getItem('remainGachaShare')
     // if (!gacha) {
     //   localStorage.setItem('remainGachaShare', 1)
@@ -203,9 +215,9 @@ export default {
     console.log(this.share_id)
   },
 
-  mounted () {
-    this.prepareGacha()
-  },
+  // mounted () {
+  //   this.prepareGacha()
+  // },
 }
 </script>
 
