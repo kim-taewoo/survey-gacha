@@ -2,10 +2,19 @@
   <v-container fill-height>
     <v-layout wrap justify-center align-center>
       <v-flex xs12>
-        <p class="pl-2" style="user-select:none"> <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다!</p>
-        <p class="pl-2" style="user-select:none"> <span class="blue--text">{{remainGacha}}</span> 개의 뽑기권이 남아있습니다!</p>
-        <figure v-show="imgReady" id="bridgeContainer" class="grey darken-3 py-2 px-2" style="border-radius: 10px">
-            <canvas id="bridge" width="750" height="550"></canvas>
+        <p class="pl-2" style="user-select:none">
+          <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다!
+        </p>
+        <p class="pl-2" style="user-select:none">
+          <span class="blue--text">{{remainGacha}}</span> 개의 뽑기권이 남아있습니다!
+        </p>
+        <figure
+          v-show="imgReady"
+          id="bridgeContainer"
+          class="grey darken-3 py-2 px-2"
+          style="border-radius: 10px"
+        >
+          <canvas id="bridge" width="750" height="550"></canvas>
         </figure>
         <figure v-show="!imgReady" class="grey darken-3 py-3 px-2 pa-5" style="border-radius: 10px">
           <v-flex xs12 class="d-flex justify-center">
@@ -25,24 +34,12 @@
         </v-flex>
         <v-flex>
           <v-btn @click.stop="dialog=true" color="blue" block>공유하고 추가 뽑기권 받기</v-btn>
-          <v-dialog
-            v-model="dialog"
-            width="500"
-          >
-            
-
+          <v-dialog v-model="dialog" width="500">
             <v-card>
-              <v-card-title
-                class="headline"
-                primary-title
-              >
-                공유하는 방법
-              </v-card-title>
+              <v-card-title class="headline" primary-title>공유하는 방법</v-card-title>
 
               <v-card-text>
-                <div>
-                  아래에 본인만의 아이디를 씁니다.
-                </div>
+                <div>아래에 본인만의 아이디를 씁니다.</div>
                 <v-flex class="xs12 md4">
                   <v-text-field hide-details label="아이디" v-model="share_id"></v-text-field>
                   <div v-if="feedback" class="text-xs-center red--text my-2">{{feedback}}</div>
@@ -50,35 +47,30 @@
                 <v-flex>
                   <v-btn :loading="loading" block color="blue" @click="checkDup">중복확인</v-btn>
                 </v-flex>
-                <div>
-                  중복확인까지 완료했다면 아래 생성된 주소를 복사해서 공유해주세요!
-                </div>
-                <div v-if="share_id" class="my-3 pink--text" v-text="shareAddress" style="word-wrap:break-word;">
-                  
-                </div>
+                <div>중복확인까지 완료했다면 아래 생성된 주소를 복사해서 공유해주세요!</div>
+                <div
+                  v-if="slug"
+                  class="my-3 pink--text subheading"
+                  v-text="shareAddress"
+                  style="word-wrap:break-word;"
+                ></div>
 
-                <div>
-                  이후 공유받은 친구가 해당 주소로 접속할 경우, 뽑기권이 추가됩니다. 해당 뽑기권을 확인, 이용하려면 현재 주소 뒤에 <span class="mx-3 pink--text">/{{share_id}}</span>(위에서 생성한 아이디) 을 붙여서 접속해보세요!
+                <div>이후 공유받은 친구가 해당 주소로 접속할 경우, 뽑기권이 추가됩니다. 해당 뽑기권은 현재 주소 뒤에
+                  <span class="mx-3 pink--text title">/{{slug}}</span>(위에서 생성한 아이디) 가 붙은 페이지에서 확인할 수 있습니다!
                 </div>
               </v-card-text>
 
               <v-divider></v-divider>
 
               <v-card-actions>
-                <v-btn
-                  color="primary"
-                  
-                  block
-                  @click="dialog = false"
-                >
-                  알겠어요!
-                </v-btn>
+                <v-btn color="primary" block @click="dialog = false">알겠어요!</v-btn>
+              </v-card-actions>
+              <v-card-actions>
+                <v-btn :disabled="!slug" color="pink" block :to="{name:'GachaShare', params: {id:id, share_id:slug}}">내 페이지 가보기</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
         </v-flex>
-
-
       </v-flex>
     </v-layout>
   </v-container>
@@ -88,7 +80,7 @@
 import db from '@/firebase/init.js'
 import firebaseApp from 'firebase/app'
 import appStorage from 'firebase/storage'
-
+import slugify from 'slugify'
 import nextTime from '@/assets/nextTime.png'
 
 export default {
@@ -103,20 +95,26 @@ export default {
       remainGacha: 0,
       dialog: false,
       share_id: null,
+      slug: null,
       feedback: null,
       loading: false
     }
   },
   computed: {
     shareAddress () {
-      return  `surveygacha.firebaseapp.com/share/${this.id}/${this.share_id}`
+      return  `surveygacha.firebaseapp.com/share/${this.id}/${this.slug}`
     }
   },
   methods: {
     checkDup() {
       if (this.share_id) {
         this.loading = true
-        let ref = db.collection('shareUsers').doc(this.share_id)
+        this.slug = slugify(this.share_id, {
+          replacement: '-',
+          remove: /[$*_+~.()'"!:@]/g,
+          lower: true
+        })
+        let ref = db.collection('shareUsers').doc(this.slug)
         ref.get()
         .then(doc => {
           if (doc.exists) {
@@ -140,47 +138,48 @@ export default {
       }
     },
     prepareGacha () {
-      if (this.remainGacha <= 0) {
-        this.imgUrl = this.nextTime
-        this.setBackground()
-        this.imgReady=true
-        alert('뽑기권을 다 사용하셨네요ㅠ')
-      } else {
-        let ref = db.collection('surveys').doc(this.id)
-        ref.get()
-        .then((doc) => {
-          if (!doc.exists) {
-            this.$router.push({name:'ErrorPage'})
+
+      let ref = db.collection('surveys').doc(this.id)
+      ref.get()
+      .then((doc) => {
+        if (!doc.exists) {
+          this.$router.push({name:'ErrorPage'})
+        } else {
+          this.docLength = doc.data().gifts.unused.length
+          if (this.remainGacha <= 0) {
+            this.imgUrl = this.nextTime
+            this.setBackground()
+            this.imgReady=true
+            alert('뽑기권이 없네요ㅠ')
           } else {
-            this.docLength = doc.data().gifts.unused.length
             if (this.docLength >= 1) {
               let rand = Math.random() <= 0.08
               if (rand) {
                 this.imgUrl = doc.data().gifts.unused[0]
                 let gifts = doc.data().gifts
                 gifts.used.push(gifts.unused[0])
-                // ref.update({
-                //   "gifts.unused" : gifts.unused.slice(1,),
-                //   "gifts.used" : gifts.used
-                // })
+                ref.update({
+                  "gifts.unused" : gifts.unused.slice(1,),
+                  "gifts.used" : gifts.used
+                })
+                this.drawImage()
               } else {
                 this.imgUrl = this.nextTime
+                this.drawImage()
               }
             } else {
               this.imgUrl = this.nextTime
+              this.setBackground()
+              this.imgReady = true
             }
-  
           }
-        })
-        .then(() => {
-          this.drawImage()
-        })
+        }
+      })
 
-      }
     },
     retryGacha() {
       if (this.remainGacha <= 0) {
-        alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
+        alert('뽑기권이 없네요! ㅠㅠ')
         this.setBackground()
         this.imgReady = true
       } else {
@@ -287,8 +286,8 @@ export default {
   created () {
     const gacha = localStorage.getItem('remainGacha')
     if (!gacha) {
-      localStorage.setItem('remainGacha', 2)
-      this.remainGacha = 2
+      localStorage.setItem('remainGacha', 3)
+      this.remainGacha = 3
     } else {
       this.remainGacha = localStorage.getItem('remainGacha')
     }
@@ -301,27 +300,29 @@ export default {
 </script>
 
 <style scoped>
-body { margin: 0; }
+body {
+  margin: 0;
+}
 
 #bridge {
-	display: block;
-	margin: 0 auto;
+  display: block;
+  margin: 0 auto;
   /* background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/calgary-bridge-1943.jpg');
 	background-image: -webkit-image-set(url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/calgary-bridge-1943.jpg') 1x, url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/calgary-bridge-1943-2x.jpg') 2x ); */
-	background-size: contain;
+  background-size: contain;
   background-position: center center;
-	width: 100%;
-	max-width: 650px;
-	height: auto;
-  cursor:  crosshair;
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  cursor: crosshair;
   /* cursor: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/circular-cursor.png) 53 53, crosshair; */
 }
-#bridgeContainer { 
+#bridgeContainer {
   text-align: center;
   font-family: Avenir, sans-serif;
 }
-#bridgeContainer figcaption {   
-  margin-top: 2rem; 
+#bridgeContainer figcaption {
+  margin-top: 2rem;
 }
 </style>
 

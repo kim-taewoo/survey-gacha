@@ -52,41 +52,61 @@ export default {
   },
   methods: {
     prepareGacha () {
-      if (this.remainGachaShare <= 0) {
-        alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
-        this.setBackground()
-        this.imgReady = true
-      } else {
+ 
 
         let ref = db.collection('surveys').doc('XDZuvUGl6e7HxyrFlK8v')
         ref.get()
         .then((doc) => {
+          let goodToGo = false
           this.docLength = doc.data().gifts.unused.length
-          if (this.docLength >= 1) {
-            let rand = Math.random() <= 0.08
-            if (rand) {
-              this.imgUrl = doc.data().gifts.unused[0]
-              let gifts = doc.data().gifts
-              gifts.used.push(gifts.unused[0])
-              // ref.update({
-              //   "gifts.unused" : gifts.unused.slice(1,),
-              //   "gifts.used" : gifts.used
-              // })
+          if (this.remainGachaShare <= 0) {
+            alert('뽑기권이 없네요! ㅠㅠ')
+            this.imgUrl = this.nextTime
+            this.setBackground()
+            this.imgReady = true
+          } else {
+            if (this.docLength >= 1) {
+              let rand = Math.random() <= 0.08
+              if (rand) {
+                this.imgUrl = doc.data().gifts.unused[0]
+                let gifts = doc.data().gifts
+                gifts.used.push(gifts.unused[0])
+                ref.update({
+                  "gifts.unused" : gifts.unused.slice(1,),
+                  "gifts.used" : gifts.used
+                })
+
+                this.drawImage()
+              } else {
+                this.imgUrl = this.nextTime
+                this.drawImage()
+
+              }
             } else {
               this.imgUrl = this.nextTime
+              this.setBackground()
+              this.imgReady = true
             }
-          } else {
-            this.imgUrl = this.nextTime
           }
+          return goodToGo
         })
-        .then(() => {
-          this.drawImage()
-        })
-      }
+        // .then((good) => {
+        //   if (good) {
+        //     this.setBackground()
+        //     this.drawImage()
+            
+        //     this.imgReady = true
+        //   }
+        //   else {
+        //     this.setBackground()
+        //     this.imgReady = true
+        //   }
+        // })
     },
     retryGacha() {
       if (this.remainGachaShare <= 0) {
-        alert('뽑기권을 다 쓰셨네요! ㅠㅠ')
+        alert('뽑기권이 없네요! ㅠㅠ')
+        this.imgUrl = this.nextTime
         this.setBackground()
         this.imgReady = true
       } else {

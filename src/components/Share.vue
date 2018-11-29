@@ -46,7 +46,9 @@ export default {
       ref.update({
         shared: shared
       })
-      window.location.replace('https://www.naver.com/')
+      .then (() => {
+        window.location.replace('https://www.naver.com/')
+      })
     })
     .catch((err)=> {
       window.location.replace('https://www.naver.com/')
