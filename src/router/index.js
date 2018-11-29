@@ -5,6 +5,7 @@ import Share from '@/components/Share'
 import Gacha from '@/components/Gacha'
 import GachaShare from '@/components/GachaShare'
 import ErrorPage from '@/components/ErrorPage'
+import SurveyList from '@/components/SurveyList'
 
 
 Vue.use(Router)
@@ -16,6 +17,11 @@ export default new Router({
       path: '/',
       name: 'HelloWorld',
       component: HelloWorld
+    },
+    {
+      path: '/surveylist',
+      name: 'SurveyList',
+      component: SurveyList
     },
     {
       path: '/gacha/:id',

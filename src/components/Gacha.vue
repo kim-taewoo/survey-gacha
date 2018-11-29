@@ -1,7 +1,7 @@
 <template>
   <v-container fill-height>
     <v-layout wrap justify-center align-center>
-      <v-flex xs12>
+      <v-flex xs12 md6>
         <p class="pl-2" style="user-select:none">
           <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다!
         </p>
@@ -153,7 +153,7 @@ export default {
             alert('뽑기권이 없네요ㅠ')
           } else {
             if (this.docLength >= 1) {
-              let rand = Math.random() <= 0.08
+              let rand = Math.random() <= 0.03
               if (rand) {
                 this.imgUrl = doc.data().gifts.unused[0]
                 let gifts = doc.data().gifts

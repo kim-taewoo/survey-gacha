@@ -1,7 +1,7 @@
 <template>
   <v-container fill-height>
     <v-layout wrap justify-center align-center>
-      <v-flex xs12>
+      <v-flex xs12 md6>
         <h3 class="pl-2 mb-3" >공유해주셔서 감사합니다 {{share_id}} 님!!</h3>
         <p class="pl-2" style="user-select:none"> <span class="pink--text">{{docLength}}</span> 개의 상품이 남아있습니다!</p>
         <p class="pl-2" style="user-select:none"> 공유로 인한 추가 뽑기권이 <span class="blue--text">{{remainGachaShare}}</span> 장 남았습니다!</p>
@@ -23,6 +23,14 @@
 
         <v-flex xs12 class="text-xs-center mt-3">
           <v-btn @click="retryGacha()" color="pink" block>재도전!</v-btn>
+        </v-flex>
+        <v-flex xs12 class="text-xs-center mt-3">
+          <v-text-field
+            :value="`surveygacha.firebaseapp.com/share/${this.id}/${this.share_id}`"
+            label="공유 URL"
+            outline
+            readonly
+          ></v-text-field>
         </v-flex>
 
 
@@ -66,7 +74,7 @@ export default {
             this.imgReady = true
           } else {
             if (this.docLength >= 1) {
-              let rand = Math.random() <= 0.08
+              let rand = Math.random() <= 0.03
               if (rand) {
                 this.imgUrl = doc.data().gifts.unused[0]
                 let gifts = doc.data().gifts

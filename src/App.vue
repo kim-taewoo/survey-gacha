@@ -30,7 +30,7 @@
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
 
-      <v-toolbar-title>Survey 가챠!</v-toolbar-title>
+      <v-toolbar-title class="ml-2">Survey Gacha!</v-toolbar-title>
     </v-toolbar>
     <v-content>
       <router-view/>
@@ -50,7 +50,8 @@ export default {
     return {
       drawer: false,
       items: [
-        {title: 'About',icon:'contact_support',link:'/'}
+        {title: 'About',icon:'contact_support',link:'/'},
+        {title: '진행중설문',icon:'list',link:'/surveylist'},
       ]
     }
   },
