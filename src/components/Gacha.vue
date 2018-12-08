@@ -34,13 +34,13 @@
         </v-flex>
         <v-flex>
           <v-btn @click.stop="dialog=true" color="blue" block>공유하고 추가 뽑기권 받기</v-btn>
-          <v-dialog v-model="dialog" width="500">
+          <v-dialog persistent v-model="dialog" width="500">
             <v-card>
               <v-card-title class="headline" primary-title>공유하는 방법</v-card-title>
 
               <v-card-text>
                 <div>아래에 본인만의 아이디를 씁니다.</div>
-                <v-flex class="xs12 md4">
+                <v-flex class="xs12">
                   <v-text-field hide-details label="아이디" v-model="share_id"></v-text-field>
                   <div v-if="feedback" class="text-xs-center red--text my-2">{{feedback}}</div>
                 </v-flex>
@@ -48,12 +48,15 @@
                   <v-btn :loading="loading" block color="blue" @click="checkDup">중복확인</v-btn>
                 </v-flex>
                 <div>중복확인까지 완료했다면 아래 생성된 주소를 복사해서 공유해주세요!</div>
-                <div
-                  v-if="slug"
-                  class="my-3 pink--text subheading"
-                  v-text="shareAddress"
-                  style="word-wrap:break-word;"
-                ></div>
+                <v-flex xs12 v-if="slug" class="my-3 pink--text subheading">
+                  <v-text-field
+                    readonly
+                    v-model="shareAddress"
+                    outline
+                    label="공유 URL"
+                    append-icon="home"
+                  ></v-text-field>
+                </v-flex>
 
                 <div>이후 공유받은 친구가 해당 주소로 접속할 경우, 뽑기권이 추가됩니다. 해당 뽑기권은 현재 주소 뒤에
                   <span class="mx-3 pink--text title">/{{slug}}</span>(위에서 생성한 아이디) 가 붙은 페이지에서 확인할 수 있습니다!

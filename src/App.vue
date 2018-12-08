@@ -35,7 +35,7 @@
     <v-content>
       <router-view/>
     </v-content>
-    <v-footer app height="60">
+    <v-footer height="60">
       <v-flex xs12 class="text-xs-right px-3 py-2">
         <span>&copy; 2018 Kim Taewoo SKKU</span>
         <div>이용문의 & 피드백: acoustic0419@gmail.com</div>
