@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-app>
     <v-navigation-drawer
       persistent
       v-model="drawer"
@@ -25,8 +25,8 @@
     </v-navigation-drawer>
     <v-toolbar
       app
-      color="black"
-      class="elevation-2"
+      color="transparent"
+      class="elevation-1"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
 
